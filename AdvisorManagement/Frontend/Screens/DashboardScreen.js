@@ -1,28 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, SafeAreaView, ScrollView, StyleSheet, StatusBar } from 'react-native';
 import AdvisorApplication from '../AdvisorApplication';
+import { API_URL } from '../API_Constants';
 
 const DashboardScreen = ({ route }) => {
   
   const [data, setData] = useState([]);
 
-  
+  const fetchAdvisors = () => {
+    fetch(`${API_URL}/advisors_application/getall`)
+      .then((response) => response.json())
+      .then((jsonData) => setData(jsonData))
+      .catch((error) => console.error(error));
+  };
+
   useEffect(() => {
-      fetch('http://127.0.0.1:5000/advisors_application/getall')
-        .then((response) => response.json())
-        .then((jsonData) => setData(jsonData))
-        .catch((error) => console.error(error));
-    }
-  );
+    fetchAdvisors();
+  }, []);
 
   const handleApprove = (username) => {
     console.log("Approving:", username);
     
-    fetch(`http://127.0.0.1:5000/advisors_application/approve/${username}`, { method: 'GET' })
+    fetch(`${API_URL}/advisors_application/approve/${username}`, { method: 'GET' })
     .then((response) => {
       if (response.ok) {
         console.log("Advisor approved successfully");
-        // Optionally, refresh the list or remove the approved advisor from the UI
+        fetchAdvisors();
       } else {
         console.error("Error approving advisor");
       }
@@ -33,11 +36,11 @@ const DashboardScreen = ({ route }) => {
   const handleDeny = (username) => {
     console.log("Denying:", username);
     
-    fetch(`http://127.0.0.1:5000/advisors_application/deny/${username}`, { method: 'POST' })
+    fetch(`${API_URL}/advisors_application/deny/${username}`, { method: 'POST' })
     .then((response) => {
       if (response.ok) {
         console.log("Advisor denied successfully");
-        // Optionally, refresh the list or remove the approved advisor from the UI
+        fetchAdvisors();
       } else {
         console.error("Error denying advisor");
       }
