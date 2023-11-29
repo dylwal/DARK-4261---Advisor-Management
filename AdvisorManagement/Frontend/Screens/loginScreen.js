@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Switch, Text, Alert } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Text, Alert, Image } from 'react-native';
 import { API_URL } from '../API_Constants';
+
 
 
 const LoginScreen = ({ onLogin, navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [isAdvisor, setIsAdvisor] = useState(false);  // State to keep track of toggle
 
   const handleLogin = () => {
-    const userType = isAdvisor ? 'advisors' : 'users';  // Determine user type based on toggle state
-    fetch(`${API_URL}/${userType}/verify/${username}/${password}`, {
+    fetch(`${API_URL}/advisors_application/verify/${username}/${password}`, {
         method: 'GET',
         headers: {
             'Accept': 'application/json',
@@ -18,22 +17,17 @@ const LoginScreen = ({ onLogin, navigation }) => {
         },
     })
     .then(response => {
-      const statusCode = response.status;  // Capture the status code
-      // Get the response text regardless of the status code
+      const statusCode = response.status;  
       return response.text().then(text => ({
         status: statusCode,
         text: text
       }));
     })
     .then(({ status, text }) => {
-      console.log("Server Response:", text);  // Log the raw response
+      console.log("Server Response:", text);  
       if (status === 200) {
         onLogin(username);
-        if (isAdvisor) {
-          navigation.navigate('Waiting')
-        } else { // Log the user in if status is 200
-        navigation.navigate('SearchAdvisors');
-        }
+        navigation.navigate('Dashboard');
       } else {
         Alert.alert('Login Failed:', text);
       }
@@ -43,32 +37,26 @@ const LoginScreen = ({ onLogin, navigation }) => {
 
   return (
     <View style={styles.container}>
+      <Image
+        source={require('../Images/Logo.png')}
+        style={styles.logo}
+      />
       <TextInput
         placeholder="Username"
+        placeholderTextColor="#34495e" 
         value={username}
         onChangeText={setUsername}
         style={styles.input}
       />
       <TextInput
         placeholder="Password"
+        placeholderTextColor="#34495e" 
         value={password}
         onChangeText={setPassword}
         secureTextEntry
         style={styles.input}
       />
-      <Button title="Login" onPress={handleLogin} color="#3498db" />
-      <View style={styles.toggleContainer}>
-        <Text>User</Text>
-        <Switch
-          trackColor={{ false: "#ecf0f1", true: "#2ecc71" }}
-          thumbColor={isAdvisor ? "#f5dd4b" : "#f4f3f4"}
-          ios_backgroundColor="#3e3e3e"
-          onValueChange={() => setIsAdvisor(previousState => !previousState)}
-          value={isAdvisor}
-        />
-        <Text>Advisor</Text>
-      </View>
-      <Button title="Register an Account" onPress={() => navigation.navigate('Registration')} color="#e74c3c" />
+      <Button title="Login" onPress={() => handleLogin()} color="#3498db" />
     </View>
   );
 };
@@ -78,7 +66,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 20,
-    backgroundColor: '#ecf0f1',  // Light gray background for contrast
+    backgroundColor: '#ecf0f1',
   },
   toggleContainer: {
     flexDirection: 'row',
@@ -88,12 +76,25 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 45,
-    borderRadius: 5,  // Rounded corners
-    borderColor: '#3498db',  // Primary color for the border
+    borderRadius: 5,
+    borderColor: '#3498db',
     borderWidth: 1,
     marginBottom: 20,
-    paddingLeft: 10
+    paddingLeft: 10,
+    elevation: 3,
+    shadowOffset: { width: 1, height: 1 },
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  logo: {
+    width: 100,
+    height: 100, 
+    resizeMode: 'contain',
+    marginBottom: 20, 
+    alignSelf: 'center',
   }
 });
 
 export default LoginScreen;
+
